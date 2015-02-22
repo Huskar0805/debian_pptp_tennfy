@@ -45,7 +45,7 @@ function installVPN(){
 	/etc/init.d/pptpd restart
 }
 
-function installVPN(){
+function uninstallVPN(){
     echo "begin to uninstall VPN";
     apt-get -y --force-yes remove ppp pptpd 
 }
