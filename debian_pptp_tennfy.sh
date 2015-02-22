@@ -1,0 +1,87 @@
+#!/bin/bash
+#===============================================================================================
+#   System Required:  Debian or Ubuntu (32bit/64bit)
+#   Description:  Install pptp vpn for Debian or Ubuntu
+#   Author: tennfy <admin@tennfy.com>
+#   Intro:  http://www.tennfy.com
+#===============================================================================================
+clear
+echo "#############################################################"
+echo "# Install pptp vpn for Debian or Ubuntu (32bit/64bit)"
+echo "# Intro: http://www.tennfy.com"
+echo "#"
+echo "# Author: tennfy <admin@tennfy.com>"
+echo "#"
+echo "#############################################################"
+echo ""
+function installVPN(){
+	apt-get update
+	#remove ppp pptpd
+	rm -rf /etc/pptpd.conf
+	rm -rf /etc/ppp
+	apt-get -y --force-yes remove ppp pptpd 
+	
+	apt-get -y --force-yes install ppp pptpd iptables curl
+	
+	echo ms-dns 208.67.222.222 >> /etc/ppp/pptpd-options
+	echo ms-dns 208.67.220.220 >> /etc/ppp/pptpd-options
+	echo localip 192.168.99.1 >> /etc/pptpd.conf
+	echo remoteip 192.168.99.9-99 >> /etc/pptpd.conf
+    
+	IP=`curl -s checkip.dyndns.com | cut -d' ' -f 6  | cut -d'<' -f 1`
+	if [ -z $IP ]; then
+    IP=`curl -s ifconfig.me/ip`
+	fi
+
+	iptables -t nat -A POSTROUTING -s 192.168.99.0/24 -j SNAT --to-source $IP
+	sed -i 's/exit\ 0/#exit\ 0/' /etc/rc.local
+    
+	echo iptables -t nat -A POSTROUTING -s 192.168.99.0/24 -j SNAT --to-source $IP >> /etc/rc.local
+	echo exit 0 >> /etc/rc.local
+	echo net.ipv4.ip_forward = 1 >> /etc/sysctl.conf
+	sysctl -p
+	# --- the sentence below was remarked By yanwen ,  what are you doing ??-----
+	# echo ystest \* intel \* >> /etc/ppp/chap-secrets
+	/etc/init.d/pptpd restart
+}
+
+function installVPN(){
+    echo "begin to uninstall VPN";
+    apt-get -y --force-yes remove ppp pptpd 
+}
+function repaireVPN(){
+	echo "begin to repaire VPN";
+	mknod /dev/ppp c 108 0
+	/etc/init.d/pptpd restart
+}
+
+function adduser(){
+	echo "input user name:"
+	read username
+	echo "input password:"
+	read userpassword
+	echo "${username} pptpd ${userpassword} *" >> /etc/ppp/chap-secrets
+	/etc/init.d/pptpd restart
+}
+
+######################### Initialization ################################################
+action=$1
+[  -z $1 ] && action=install
+case "$action" in
+install)
+    installVPN
+    ;;
+uninstall)
+    uninstallVPN
+    ;;
+repaire)
+    repaireVPN
+    ;;
+adduser)
+    adduser
+    ;;	
+*)
+    echo "Arguments error! [${action} ]"
+    echo "Usage: `basename $0` {install|uninstall|update}"
+    ;;
+esac
