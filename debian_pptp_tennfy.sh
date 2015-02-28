@@ -19,7 +19,7 @@ function getip(){
 	if [ -z $IP ]; then
     IP=`curl -s ifconfig.me/ip`
 	fi
-	return IP
+	return $IP
 }
 function installVPN(){
 	apt-get update
