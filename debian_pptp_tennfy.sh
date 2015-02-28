@@ -54,6 +54,7 @@ function uninstallVPN(){
     apt-get -y --force-yes remove ppp pptpd 
 	sed -i '/192.168.99.0/d' /etc/rc.local 
 	sed -i '/net.ipv4.ip_forward/d' /etc/sysctl.conf
+	sysctl -p
 }
 function repaireVPN(){
 	echo "begin to repaire VPN";
