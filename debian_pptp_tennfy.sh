@@ -35,7 +35,7 @@ function installVPN(){
 	echo localip 192.168.99.1 >> /etc/pptpd.conf
 	echo remoteip 192.168.99.9-99 >> /etc/pptpd.conf
     
-	IP='getip'
+	IP=`getip`
 	
 	iptables -t nat -A POSTROUTING -s 192.168.99.0/24 -j SNAT --to-source $IP
 	sed -i 's/exit\ 0/#exit\ 0/' /etc/rc.local
