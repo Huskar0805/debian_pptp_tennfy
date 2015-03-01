@@ -14,6 +14,23 @@ echo "# Author: tennfy <admin@tennfy.com>"
 echo "#"
 echo "#############################################################"
 echo ""
+function check_sanity {
+	# Do some sanity checking.
+	if [ $(/usr/bin/id -u) != "0" ]
+	then
+		die 'Must be run by root user'
+	fi
+
+	if [ ! -f /etc/debian_version ]
+	then
+		die "Distribution is not supported"
+	fi
+}
+
+function die {
+	echo "ERROR: $1" > /dev/null 1>&2
+	exit 1
+}
 function installVPN(){
 	apt-get update
 	#remove ppp pptpd
@@ -68,6 +85,8 @@ function adduser(){
 }
 
 ######################### Initialization ################################################
+# Make sure only root can run our script
+check_sanity
 action=$1
 [  -z $1 ] && action=install
 case "$action" in
